@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Ebook Menopausa - Flipbook Interativo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        header {
+            width: 100%;
+            padding: 10px 15px;
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #flipbook-container {
+            width: 100%;
+            height: calc(100vh - 120px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        #flipbook {
+            width: 100%;
+            height: 100%;
+            max-width: 900px;
+            max-height: 650px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page {
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        .page img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .controls {
+            width: 100%;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            background-color: rgba(0, 0, 0, 0.3);
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #e91e63;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #c2185b;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .page-info {
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .progress-bar {
+            width: 150px;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #e91e63;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            header {
+                font-size: 16px;
+                padding: 8px 10px;
+            }
+
+            #flipbook-container {
+                height: calc(100vh - 110px);
+                padding: 5px;
+            }
+
+            #flipbook {
+                max-height: 500px;
+                border-radius: 6px;
+            }
+
+            .controls {
+                padding: 10px;
+                gap: 8px;
+            }
+
+            button {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+
+            .page-info {
+                font-size: 12px;
+            }
+
+            .progress-bar {
+                width: 100px;
+                margin: 0 5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                height: 100dvh;
+            }
+
+            header {
+                font-size: 14px;
+                padding: 6px 8px;
+            }
+
+            #flipbook-container {
+                height: calc(100dvh - 100px);
+                padding: 3px;
+            }
+
+            #flipbook {
+                max-height: 400px;
+                border-radius: 4px;
+            }
+
+            .controls {
+                padding: 8px;
+                gap: 5px;
+                justify-content: space-around;
+            }
+
+            button {
+                padding: 6px 12px;
+                font-size: 11px;
+                flex: 1;
+                min-width: 60px;
+            }
+
+            .page-info {
+                font-size: 11px;
+                order: -1;
+                width: 100%;
+                margin-bottom: 8px;
+                text-align: center;
+            }
+
+            .progress-bar {
+                display: none;
+            }
+        }
+
+        /* Indicador de toque */
+        .touch-indicator {
+            position: absolute;
+            top: 50%;
+            left: 20%;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+
+        .touch-indicator.right {
+            left: auto;
+            right: 20%;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        📖 Ebook Menopausa - Flipbook Interativo
+    </header>
+
+    <div id="flipbook-container">
+        <div id="flipbook">
+            <div class="page-container" id="page-container">
+                <!-- As páginas serão inseridas aqui via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="prev">← Anterior</button>
+        <div class="page-info">
+            Página <span id="current-page">1</span> de <span id="total-pages">31</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <button id="next">Próxima →</button>
+    </div>
+
+    <script>
+        const TOTAL_PAGES = 31;
+        let currentPage = 1;
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let isAnimating = false;
+
+        // Inicializar páginas
+        function initializePages() {
+            const container = document.getElementById('page-container');
+            for (let i = 1; i <= TOTAL_PAGES; i++) {
+                const pageNum = i.toString().padStart(2, '0');
+                const pageDiv = document.createElement('div');
+                pageDiv.className = `page ${i === 1 ? 'active' : ''}`;
+                pageDiv.innerHTML = `<img src="pages/page-${pageNum}.png" alt="Página ${i}" loading="lazy">`;
+                container.appendChild(pageDiv);
+            }
+            updateUI();
+        }
+
+        // Atualizar interface
+        function updateUI() {
+            document.getElementById('current-page').textContent = currentPage;
+            document.getElementById('total-pages').textContent = TOTAL_PAGES;
+            
+            // Atualizar barra de progresso
+            const progress = (currentPage / TOTAL_PAGES) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+
+            // Atualizar visibilidade das páginas
+            document.querySelectorAll('.page').forEach((page, index) => {
+                page.classList.toggle('active', index + 1 === currentPage);
+            });
+
+            // Desabilitar botões nas extremidades
+            document.getElementById('prev').disabled = currentPage === 1;
+            document.getElementById('next').disabled = currentPage === TOTAL_PAGES;
+        }
+
+        // Navegar para página anterior
+        function goToPrevious() {
+            if (currentPage > 1 && !isAnimating) {
+                isAnimating = true;
+                currentPage--;
+                updateUI();
+                setTimeout(() => { isAnimating = false; }, 500);
+            }
+        }
+
+        // Navegar para próxima página
+        function goToNext() {
+            if (currentPage < TOTAL_PAGES && !isAnimating) {
+                isAnimating = true;
+                currentPage++;
+                updateUI();
+                setTimeout(() => { isAnimating = false; }, 500);
+            }
+        }
+
+        // Eventos de toque (swipe)
+        function handleTouchStart(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }
+
+        function handleTouchEnd(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe para esquerda = próxima página
+                    goToNext();
+                } else {
+                    // Swipe para direita = página anterior
+                    goToPrevious();
+                }
+            }
+        }
+
+        // Eventos de teclado
+        function handleKeyPress(e) {
+            if (e.key === 'ArrowLeft') goToPrevious();
+            if (e.key === 'ArrowRight') goToNext();
+        }
+
+        // Configurar event listeners
+        document.getElementById('prev').addEventListener('click', goToPrevious);
+        document.getElementById('next').addEventListener('click', goToNext);
+        document.getElementById('flipbook').addEventListener('touchstart', handleTouchStart, false);
+        document.getElementById('flipbook').addEventListener('touchend', handleTouchEnd, false);
+        window.addEventListener('keydown', handleKeyPress);
+
+        // Prevenir zoom duplo em toque
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Inicializar ao carregar
+        document.addEventListener('DOMContentLoaded', initializePages);
+    </script>
+</body>
+</html>
